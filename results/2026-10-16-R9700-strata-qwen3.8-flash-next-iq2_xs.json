@@ -5,7 +5,7 @@
   "version": "0.1.0"
  },
  "generated_at": "2026-10-16T07:32:02-05:00",
- "label": "Strata UD-IQ2_XS",
+ "label": "R9700 Strata QFN UD-IQ2_XS",
  "device": {
   "accelerator": {
    "kind": "gpu",

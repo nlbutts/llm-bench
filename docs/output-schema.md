@@ -112,3 +112,8 @@ The schema version is `schema` (currently `1`).
   tool did. Never mix the two in one comparison without saying so.
 - **Medians.** `results[]` holds median/min/max over the successful runs of a
   length; `n` is how many succeeded.
+- **Null metrics.** A `results[]` field is null when nothing ever measured it -
+  a server that reports no prompt throughput leaves `prefill_tps` null, and one
+  that omits `usage` leaves `prompt_tokens` null. `llmbench-plot` skips such
+  rows and says which field and how many rows, rather than dropping the series
+  from the figure in silence.

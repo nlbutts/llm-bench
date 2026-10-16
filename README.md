@@ -77,7 +77,7 @@ unusual server still produces a complete record.
 ## Compare runs with plots
 
 `llmbench-plot` turns any number of result JSON files into comparison plots -
-one series per file, labelled from its device / framework / model:
+one series per file, labelled with that file's own `label` and nothing else:
 
 ```bash
 python -m llmbench.plot results/*.json                 # plots/comparison-*.png
@@ -88,6 +88,25 @@ python -m llmbench.plot results/ --formats png,svg --out plots
 It writes one figure per metric (prefill, decode, TTFT, total) plus a combined
 grid, with median points and min/max error bars. Plotting uses matplotlib when it
 is installed and falls back to a dependency-free SVG otherwise.
+
+Nothing goes missing quietly. A file that cannot be read, a file that is not a
+result document, and a file with no rows for the metric being drawn are each
+reported on stderr with the field responsible, and the run ends with a per-metric
+count. A server that reports no prompt throughput drops out of the prefill
+figure only:
+
+```
+warning: Strata UD-IQ4_XS (results/b.json): not plotted for prefill - prefill_tps is null on 5 of 5 rows
+         Strata UD-IQ4_XS: plotted for decode, ttft, total only
+plotted 4 of 4 files: prefill 3/4, decode 4/4, ttft 4/4, total 4/4
+```
+
+It also warns when a file has no `label` (the legend falls back to the whole
+filename) and when two files share one `label`, which would otherwise put two
+lines in the legend under the same name.
+
+`--strict` exits non-zero when anything was left out, which is what you want in
+CI; `--quiet` keeps stderr clean for scripting.
 
 ## Design notes
 
