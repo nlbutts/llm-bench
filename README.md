@@ -86,8 +86,9 @@ python -m llmbench.plot results/ --formats png,svg --out plots
 ```
 
 It writes one figure per metric (prefill, decode, TTFT, total) plus a combined
-grid, with median points and min/max error bars. Plotting uses matplotlib when it
-is installed and falls back to a dependency-free SVG otherwise.
+2x2 grid with a single shared legend, median points and min/max error bars.
+Plotting uses matplotlib when it is installed and falls back to a dependency-free
+SVG otherwise.
 
 Nothing goes missing quietly. A file that cannot be read, a file that is not a
 result document, and a file with no rows for the metric being drawn are each

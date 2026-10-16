@@ -13,10 +13,17 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from llmbench.device import _pretty_gpu_name  # noqa: E402
 from llmbench.framework import _quant_from_id  # noqa: E402
-from llmbench.plot import (METRICS, _drop_reason, _load_problem, _report,  # noqa: E402
-                           _shape_problem, audit, label_for, series)
+from llmbench.plot import (METRICS, _drop_reason, _grid_shape, _load_problem,  # noqa: E402
+                           _report, _shape_problem, audit, label_for, series)
 from llmbench.sweep import word_prompt  # noqa: E402
 from llmbench.util import normalize_base, slug, stat  # noqa: E402
+
+try:  # the repo runs without matplotlib; these tests are the only ones that need it
+    import matplotlib
+    matplotlib.use("Agg")
+    HAVE_MPL = True
+except Exception:  # noqa: BLE001
+    HAVE_MPL = False
 
 
 class TestQuant(unittest.TestCase):
@@ -235,6 +242,42 @@ class TestPlotDiagnostics(unittest.TestCase):
         self.assertGreater(problems, 0)  # so --strict fails on it
         self.assertTrue(any("not in these plots" in m for m in msgs), msgs)
         self.assertTrue(any("no file has prefill data" in m for m in msgs), msgs)
+
+
+class TestGridShape(unittest.TestCase):
+    def test_square_ish(self):
+        self.assertEqual(_grid_shape(4), (2, 2))   # the four default metrics
+        self.assertEqual(_grid_shape(2), (1, 2))
+        self.assertEqual(_grid_shape(1), (1, 1))
+
+    def test_three_metrics_use_a_full_two_by_two(self):
+        self.assertEqual(_grid_shape(3), (2, 2))
+
+
+@unittest.skipUnless(HAVE_MPL, "matplotlib not installed")
+class TestGridDraw(unittest.TestCase):
+    """The combined figure shares one legend, and must not invent missing data."""
+
+    def _draw(self, metric, rows):
+        import matplotlib.pyplot as plt
+        from llmbench.plot import _draw
+        fig, ax = plt.subplots()
+        _draw(ax, [("s", Path("s.json"), {"results": rows})], metric, True, legend=False)
+        texts = [t.get_text() for t in ax.texts]
+        legend = ax.get_legend()
+        plt.close(fig)
+        return texts, legend
+
+    def test_draws_series_without_a_per_panel_legend(self):
+        texts, legend = self._draw("decode", [
+            {"prompt_tokens": {"median": 4096},
+             "decode_tps": {"median": 30, "min": 29, "max": 31}}])
+        self.assertEqual(texts, [])        # data was drawn, so no "no data" note
+        self.assertIsNone(legend)          # the grid supplies one legend itself
+
+    def test_still_says_so_when_a_metric_has_no_data(self):
+        texts, _legend = self._draw("decode", [])
+        self.assertTrue(any("no decode data" in t for t in texts), texts)
 
 
 if __name__ == "__main__":

@@ -24,6 +24,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import sys
 from pathlib import Path
 
@@ -311,6 +312,12 @@ def _fmt_x(v: float, _pos=None) -> str:
     return ("%gK" % (v / 1000)) if v >= 1000 else "%g" % v
 
 
+def _grid_shape(n: int) -> tuple[int, int]:
+    """(rows, cols) for n panels, kept square-ish: 4 -> 2x2, 2 -> 1x2, 3 -> 2x2."""
+    ncols = math.ceil(math.sqrt(n))
+    return math.ceil(n / ncols), ncols
+
+
 def plot(files: list[Path], outdir: Path, metrics: list[str], title: str | None,
          error_bars: bool = True, formats=("png",), warn=_warn,
          strict: bool = False) -> list[Path]:
@@ -368,13 +375,30 @@ def plot(files: list[Path], outdir: Path, metrics: list[str], title: str | None,
             written.append(p)
         plt.close(fig)
 
-    # one combined figure
-    fig, axes = plt.subplots(len(metrics), 1, figsize=(7.5, 3.2 * len(metrics)), squeeze=False)
-    for ax, metric in zip(axes[:, 0], metrics):
-        _draw(ax, loaded, metric, error_bars)
+    # one combined figure, square-ish: 2x2 for the four default metrics
+    nrows, ncols = _grid_shape(len(metrics))
+    fig, axes = plt.subplots(nrows, ncols, figsize=(6.0 * ncols, 4.0 * nrows),
+                             squeeze=False, constrained_layout=True)
+    panels = [ax for row in axes for ax in row]
+    for ax, metric in zip(panels, metrics):
+        _draw(ax, loaded, metric, error_bars, legend=False)
+    for ax in panels[len(metrics):]:  # three metrics leave one blank cell
+        ax.axis("off")
+    # one legend for the whole grid; repeating every label in all four panels is
+    # the clutter that made these plots unreadable
+    handles, labels = [], []
+    for ax in panels:
+        for handle, name in zip(*ax.get_legend_handles_labels()):
+            if name not in labels:
+                handles.append(handle)
+                labels.append(name)
+    if handles:
+        # enough columns to keep the legend row about 100 characters wide
+        ncol = max(1, min(len(labels), 100 // (max(len(x) for x in labels) + 4)))
+        fig.legend(handles, labels, loc="outside lower center", frameon=False,
+                   fontsize=8, ncol=ncol)
     if title:
-        axes[0, 0].set_title(title)
-    fig.tight_layout()
+        fig.suptitle(title)
     for ext in formats:
         p = outdir / ("comparison-all.%s" % ext)
         fig.savefig(p, bbox_inches="tight")
@@ -383,7 +407,7 @@ def plot(files: list[Path], outdir: Path, metrics: list[str], title: str | None,
     return written
 
 
-def _draw(ax, loaded, metric, error_bars):
+def _draw(ax, loaded, metric, error_bars, legend: bool = True):
     ylabel, _field, _dir = METRICS[metric]
     any_series = False
     for i, (label, _fp, r) in enumerate(loaded):
@@ -401,7 +425,8 @@ def _draw(ax, loaded, metric, error_bars):
     ax.set_ylabel(ylabel)
     ax.xaxis.set_major_formatter(_fmt_x)
     if any_series:
-        ax.legend(fontsize=8, loc="best")
+        if legend:
+            ax.legend(fontsize=8, loc="best")
     else:
         ax.text(0.5, 0.5, "no %s data in any file" % metric, ha="center", va="center",
                 fontsize=11, color="#a33")
