@@ -82,6 +82,27 @@ class TestPlotSeries(unittest.TestCase):
         r = {"results": [{"prompt_tokens": {"median": 100}, "decode_tps": None}]}
         self.assertEqual(series(r, "decode"), ([], [], [], []))
 
+    def test_falls_back_to_target_tokens(self):
+        # Servers that omit usage leave prompt_tokens null; target_tokens still places the point.
+        r = {"results": [
+            {"target_tokens": 8192, "prompt_tokens": None,
+             "decode_tps": {"median": 33, "min": 31, "max": 34}},
+            {"target_tokens": 4096, "prompt_tokens": None,
+             "decode_tps": {"median": 30, "min": 29, "max": 30}},
+        ]}
+        xs, ys, lo, hi = series(r, "decode")
+        self.assertEqual(xs, [4096, 8192])
+        self.assertEqual(ys, [30, 33])
+        self.assertEqual(lo, [1, 2])
+        self.assertEqual(hi, [0, 1])
+
+    def test_prefers_measured_prompt_tokens(self):
+        r = {"results": [{"target_tokens": 4096,
+                          "prompt_tokens": {"median": 4019},
+                          "decode_tps": {"median": 35, "min": 35, "max": 35}}]}
+        xs, _ys, _lo, _hi = series(r, "decode")
+        self.assertEqual(xs, [4019])
+
 
 if __name__ == "__main__":
     unittest.main()

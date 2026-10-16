@@ -6,7 +6,8 @@
 
 Each file is one series, labelled from its own `label` field or from its
 device / framework / model. Points are the median over runs with min/max error
-bars. Requires matplotlib for PNG/SVG; without it, a dependency-free SVG is
+bars. The x position is the measured `prompt_tokens`, falling back to the
+sweep's `target_tokens` when a server omits token usage. Requires matplotlib for PNG/SVG; without it, a dependency-free SVG is
 written instead so the repo's no-dependency promise still holds.
 """
 from __future__ import annotations
@@ -47,16 +48,29 @@ def label_for(r: dict, fallback: str) -> str:
     return " | ".join(parts) if parts else fallback
 
 
+def _x_value(row: dict):
+    """X for one row: measured prompt tokens, else the sweep's target length.
+
+    Some servers omit `usage.prompt_tokens`, which leaves `prompt_tokens` null;
+    falling back to `target_tokens` keeps such a file on the x-axis instead of
+    dropping every one of its points.
+    """
+    pt = row.get("prompt_tokens") or {}
+    if pt.get("median") is not None:
+        return pt["median"]
+    return row.get("target_tokens")
+
+
 def series(r: dict, metric: str):
     """Points for one metric: (xs, ys, lower_err, upper_err) over the file's lengths."""
     field = METRICS[metric][1]
     xs, ys, lo, hi = [], [], [], []
     for row in r.get("results", []):
-        pt = row.get("prompt_tokens") or {}
+        x = _x_value(row)
         mv = row.get(field) or {}
-        if pt.get("median") is None or mv.get("median") is None:
+        if x is None or mv.get("median") is None:
             continue
-        xs.append(pt["median"])
+        xs.append(x)
         ys.append(mv["median"])
         lo.append(max(0.0, mv["median"] - mv.get("min", mv["median"])))
         hi.append(max(0.0, mv.get("max", mv["median"]) - mv["median"]))
