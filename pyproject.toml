@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "llm-bench"
+version = "0.1.0"
+description = "Benchmark any LLM framework, model, and device over an OpenAI-compatible API"
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [{ name = "Nick Butts", email = "nlbutts@ieee.org" }]
+keywords = ["llm", "benchmark", "prefill", "decode", "inference", "openai"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+
+[project.scripts]
+llmbench = "llmbench.cli:main"
+llmbench-plot = "llmbench.plot:main"
+
+[tool.setuptools]
+packages = ["llmbench"]
