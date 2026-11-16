@@ -4,6 +4,7 @@
 """
 import json
 import os
+import re
 import sys
 import tempfile
 import unittest
@@ -14,7 +15,8 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from llmbench.device import _pretty_gpu_name  # noqa: E402
 from llmbench.framework import _quant_from_id  # noqa: E402
 from llmbench.plot import (METRICS, _drop_reason, _grid_shape, _load_problem,  # noqa: E402
-                           _report, _shape_problem, audit, label_for, series)
+                           _report, _shape_problem, audit, collect_files, filter_files,
+                           label_for, main as plot_main, regex_arg, series)
 from llmbench.sweep import word_prompt  # noqa: E402
 from llmbench.util import normalize_base, slug, stat  # noqa: E402
 
@@ -145,6 +147,70 @@ class TestPlotLabel(unittest.TestCase):
         _per, _dead, _gaps = _report([("same", Path("a.json"), r), ("same", Path("b.json"), r)],
                                      ["decode"], msgs.append)
         self.assertTrue(any("share the label" in m for m in msgs), msgs)
+
+
+class TestPlotFileSelection(unittest.TestCase):
+    """Regex selection has to be predictable: include OR'd, exclude always wins."""
+
+    files = [Path("results/2026-11-14-R9700-strata.json"),
+             Path("results/2026-11-15-R9700-radiance.json"),
+             Path("results/2026-10-16-gmktek-strata.json")]
+
+    def _matched(self, **kw):
+        return [fp.name for fp in filter_files(self.files, **kw)]
+
+    def test_include_matches_filename_without_a_path_prefix(self):
+        self.assertEqual(self._matched(include=[re.compile("R9700")]),
+                         ["2026-11-14-R9700-strata.json",
+                          "2026-11-15-R9700-radiance.json"])
+
+    def test_include_matches_the_full_path_too(self):
+        self.assertEqual(self._matched(include=[re.compile(r"^results/2026-11")]),
+                         ["2026-11-14-R9700-strata.json",
+                          "2026-11-15-R9700-radiance.json"])
+
+    def test_repeated_includes_are_or_d(self):
+        self.assertEqual(self._matched(include=[re.compile("strata"),
+                                                re.compile("radiance")]),
+                         [fp.name for fp in self.files])
+
+    def test_exclude_overrides_include(self):
+        self.assertEqual(self._matched(include=[re.compile("R9700")],
+                                       exclude=[re.compile("radiance")]),
+                         ["2026-11-14-R9700-strata.json"])
+
+    def test_no_patterns_keeps_every_file(self):
+        self.assertEqual(self._matched(), [fp.name for fp in self.files])
+
+    def test_invalid_regex_is_a_usage_error(self):
+        import argparse
+        with self.assertRaises(argparse.ArgumentTypeError) as cm:
+            regex_arg("[unclosed")
+        self.assertIn("invalid regular expression", str(cm.exception))
+
+    def test_collect_files_expands_a_directory_and_skips_missing(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            (root / "a.json").write_text("{}")
+            (root / "notes.txt").write_text("ignore me")
+            msgs = []
+            got = collect_files([str(root), str(root / "gone.json")], msgs.append)
+            self.assertEqual(got, [root / "a.json"])
+            self.assertTrue(any("no such file" in m for m in msgs), msgs)
+
+    def test_cli_applies_regex_and_exclude_before_plotting(self):
+        from unittest import mock
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d) / "results"
+            root.mkdir()
+            for name in ("keep-one.json", "keep-two.json", "drop.json"):
+                (root / name).write_text("{}")
+            with mock.patch("llmbench.plot.plot", return_value=[]) as run:
+                rc = plot_main([str(root), "--regex", "keep", "--exclude", "two",
+                                "--quiet", "--out", str(Path(d) / "plots")])
+            self.assertEqual(rc, 0)
+            chosen = [fp.name for fp in run.call_args.args[0]]
+            self.assertEqual(chosen, ["keep-one.json"])
 
 
 class TestPlotDiagnostics(unittest.TestCase):

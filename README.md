@@ -85,6 +85,26 @@ python -m llmbench.plot a.json b.json c.json --metric decode
 python -m llmbench.plot results/ --formats png,svg --out plots
 ```
 
+Point it at files with a regular expression instead of listing them:
+
+```bash
+# every R9700 run whose filename mentions strata or radiance
+python -m llmbench.plot --regex 'R9700.*(strata|radiance)'
+
+# the same selection, but without the older raw IQ2 run
+python -m llmbench.plot --regex 'R9700' --exclude 'iq2_xs'
+
+# narrow by directory and date as well as filename
+python -m llmbench.plot results/ --regex '^results/2026-11'
+```
+
+`--regex` is repeatable (matches are OR'd) and `--exclude` always wins. Both
+match against the path and the filename, so a plain `R9700` works without
+spelling out `results/`. The positional arguments still accept files and
+directories as before; a directory contributes its top-level `*.json` files,
+and with no positional arguments the default `results/` directory is filtered.
+Quote patterns so your shell does not expand their `*`, `?`, or `|` first.
+
 It writes one figure per metric (prefill, decode, TTFT, total) plus a combined
 2x2 grid with a single shared legend, median points and min/max error bars.
 Plotting uses matplotlib when it is installed and falls back to a dependency-free

@@ -1,0 +1,725 @@
+{
+ "schema": 1,
+ "tool": {
+  "name": "llm-bench",
+  "version": "0.1.0"
+ },
+ "generated_at": "2026-11-15T21:42:36-06:00",
+ "label": "R9700 llama.cpp qwen3.8-flash-next-ud-iq3_xxs",
+ "device": {
+  "accelerator": {
+   "kind": "gpu",
+   "vendor": "AMD",
+   "name": "device",
+   "memory_total_gib": null,
+   "architecture": null,
+   "count": 2,
+   "devices": [
+    "device",
+    "N/A"
+   ]
+  },
+  "host": {
+   "cpu": {
+    "name": "AMD Ryzen 7 5800X3D 8-Core Processor",
+    "logical_cores": 16,
+    "physical_cores": 8
+   },
+   "ram_total_gib": 62.7,
+   "os": {
+    "system": "Linux",
+    "release": "7.0.0-43-generic",
+    "version": "#43~24.04.1-Ubuntu SMP PREEMPT_DYNAMIC Sat Oct 31 06:52:47 UTC 2",
+    "distro": "Ubuntu 24.04.5 LTS",
+    "machine": "x86_64"
+   }
+  }
+ },
+ "framework": {
+  "endpoint": "http://127.0.0.1:8080",
+  "name": "llama.cpp (llama-server)",
+  "version": null,
+  "detected_by": "/props",
+  "dialects": [],
+  "probes": {
+   "health": {
+    "status": "ok"
+   },
+   "props": {
+    "default_generation_settings": {
+     "params": {
+      "seed": 4294967295,
+      "temperature": 1.0,
+      "dynatemp_range": 0.0,
+      "dynatemp_exponent": 1.0,
+      "top_k": 20,
+      "top_p": 0.949999988079071,
+      "min_p": 0.05000000074505806,
+      "top_n_sigma": -1.0,
+      "xtc_probability": 0.0,
+      "xtc_threshold": 0.10000000149011612,
+      "typical_p": 1.0,
+      "repeat_last_n": 64,
+      "repeat_penalty": 1.0,
+      "presence_penalty": 0.0,
+      "frequency_penalty": 0.0,
+      "dry_multiplier": 0.0,
+      "dry_base": 1.75,
+      "dry_allowed_length": 2,
+      "dry_penalty_last_n": 64,
+      "mirostat": 0,
+      "mirostat_tau": 5.0,
+      "mirostat_eta": 0.10000000149011612,
+      "adaptive_target": -1.0,
+      "adaptive_decay": 0.8999999761581421,
+      "max_tokens": -1,
+      "n_predict": -1,
+      "n_keep": 0,
+      "n_discard": 0,
+      "ignore_eos": false,
+      "stream": false,
+      "n_probs": 0,
+      "min_keep": 0,
+      "chat_format": "Content-only",
+      "reasoning_format": "none",
+      "reasoning_in_content": false,
+      "generation_prompt": "",
+      "samplers": [
+       "penalties",
+       "dry",
+       "top_n_sigma",
+       "top_k",
+       "typ_p",
+       "top_p",
+       "min_p",
+       "xtc",
+       "temperature"
+      ],
+      "speculative.types": "none",
+      "timings_per_token": false,
+      "post_sampling_probs": false,
+      "backend_sampling": false,
+      "lora": []
+     },
+     "n_ctx": 200192
+    },
+    "total_slots": 1,
+    "model_alias": "qwen3.8-flash-next-iq3_xxs",
+    "model_ftype": "IQ3_XXS - 3.0625 bpw",
+    "model_path": "unsloth-UD-IQ3_XXS/Qwen3.8-Flash-Next-UD-IQ3_XXS-00001-of-00004.gguf",
+    "modalities": {
+     "vision": false,
+     "video": false,
+     "audio": false
+    },
+    "media_marker": "<__media_nAE3nygRhr3tXSWksl7ypC7vcHZbeem0__>",
+    "endpoint_slots": true,
+    "endpoint_props": false,
+    "endpoint_metrics": false,
+    "ui": true,
+    "ui_settings": {},
+    "chat_template": "{%- set image_count = namespace(value=0) %}\n{%- set video_count = namespace(value=0) %}\n{%- macro render_content(content, do_vision_count, is_system_content=false) %}\n    {%- if content is string %}\n        {{- content }}\n    {%- elif content is iterable and content is not mapping %}\n        {%- for item in content %}\n            {%- if 'image' in item or 'image_url' in item or item.type == 'image' %}\n                {%- if is_system_content %}\n                    {{- raise_exception('System message cannot contain images.') }}\n                {%- endif %}\n                {%- if do_vision_count %}\n                    {%- set image_count.value = image_count.value + 1 %}\n                {%- endif %}\n                {%- if add_vision_id %}\n                    {{- 'Picture ' ~ image_count.value ~ ': ' }}\n                {%- endif %}\n                {{- '<|vision_start|><|image_pad|><|vision_end|>' }}\n            {%- elif 'video' in item or item.type == 'video' %}\n                {%- if is_system_content %}\n                    {{- raise_exception('System message cannot contain videos.') }}\n                {%- endif %}\n                {%- if do_vision_count %}\n                    {%- set video_count.value = video_count.value + 1 %}\n                {%- endif %}\n                {%- if add_vision_id %}\n                    {{- 'Video ' ~ video_count.value ~ ': ' }}\n                {%- endif %}\n                {{- '<|vision_start|><|video_pad|><|vision_end|>' }}\n            {%- elif 'text' in item %}\n                {{- item.text }}\n            {%- else %}\n                {{- raise_exception('Unexpected item type in content.') }}\n            {%- endif %}\n        {%- endfor %}\n    {%- elif content is none or content is undefined %}\n        {{- '' }}\n    {%- else %}\n        {{- raise_exception('Unexpected content type.') }}\n    {%- endif %}\n{%- endmacro %}\n{%- if not messages %}\n    {{- raise_exception('No messages provided.') }}\n{%- endif %}\n{%- set sysns = namespace(count=0, text='') %}\n{%- for message in messages %}\n    {%- if sysns.count == loop.index0 and (message.role == 'system' or message.role == 'developer') %}\n        {%- set sys_content = render_content(message.content, false, true)|trim %}\n        {%- if sys_content %}\n            {%- set sysns.text = sysns.text + ('\\n' if sysns.text else '') + sys_content %}\n        {%- endif %}\n        {%- set sysns.count = sysns.count + 1 %}\n    {%- endif %}\n{%- endfor %}\n{%- set num_sys = sysns.count %}\n{%- set merged_system = sysns.text %}\n{%- set reasoning_instructions = '' %}\n{%- if enable_thinking is undefined or enable_thinking is true %}\n    {%- set resolved_reasoning_effort = reasoning_effort|default('xhigh') %}\n    {%- if resolved_reasoning_effort == 'high' %}\n        {%- set resolved_reasoning_effort = 'xhigh' %}\n    {%- endif %}\n    {%- if resolved_reasoning_effort not in ('xhigh', 'medium', 'low') %}\n        {{- raise_exception('Unexpected reasoning effort ' ~ reasoning_effort ~ '. Supported types are xhigh (default), medium, and low.') }}\n    {%- endif %}\n    {%- if resolved_reasoning_effort == 'xhigh' %}\n        {%- set reasoning_instructions = 'Reasoning effort is set to xhigh. Please think carefully through the task, validate key assumptions, consider plausible alternatives, and prioritize correctness, consistency, and clarity in the final answer.' %}\n    {%- elif resolved_reasoning_effort == 'low' %}\n        {%- set reasoning_instructions = 'Reasoning effort is set to low. Keep your thinking brief and focused, moving directly to the conclusion without unnecessary elaboration.' %}\n    {%- endif %}\n{%- endif %}\n{%- if tools and tools is iterable and tools is not mapping %}\n    {{- '<|im_start|>system\\n' }}\n    {%- if reasoning_instructions %}\n        {{- reasoning_instructions + '\\n\\n' }}\n    {%- endif %}\n    {{- \"# Tools\\n\\nYou have access to the following functions:\\n\\n<tools>\" }}\n    {%- for tool in tools %}\n        {{- \"\\n\" }}\n        {{- tool | tojson }}\n    {%- endfor %}\n    {{- \"\\n</tools>\" }}\n    {{- '\\n\\nIf you choose to call a function ONLY reply in the following format with NO suffix:\\n\\n<tool_call>\\n<function=example_function_name>\\n<parameter=example_parameter_1>\\nvalue_1\\n</parameter>\\n<parameter=example_parameter_2>\\nThis is the value for the second parameter\\nthat can span\\nmultiple lines\\n</parameter>\\n</function>\\n</tool_call>\\n\\n<IMPORTANT>\\nReminder:\\n- Function calls MUST follow the specified format: an inner <function=...></function> block must be nested within <tool_call></tool_call> XML tags\\n- Required parameters MUST be specified\\n- You may provide optional reasoning for your function call in natural language BEFORE the function call, but NOT after\\n- If there is no function call available, answer the question like normal with your current knowledge and do not tell the user about function calls\\n</IMPORTANT>' }}\n    {%- if merged_system %}\n        {{- '\\n\\n' + merged_system }}\n    {%- endif %}\n    {{- '<|im_end|>\\n' }}\n{%- else %}\n    {%- if merged_system %}\n        {{- '<|im_start|>system\\n' + (reasoning_instructions + '\\n\\n' if reasoning_instructions else '')  + merged_system + '<|im_end|>\\n' }}\n    {%- elif reasoning_instructions %}\n        {{- '<|im_start|>system\\n' + reasoning_instructions + '<|im_end|>\\n' }}\n    {%- endif %}\n{%- endif %}\n{%- set ns = namespace(multi_step_tool=true, last_query_index=messages|length - 1) %}\n{%- for message in messages[::-1] %}\n    {%- set index = (messages|length - 1) - loop.index0 %}\n    {%- if ns.multi_step_tool and message.role == \"user\" %}\n        {%- set content = render_content(message.content, false)|trim %}\n        {%- if not(content.startswith('<tool_response>') and content.endswith('</tool_response>')) %}\n            {%- set ns.multi_step_tool = false %}\n            {%- set ns.last_query_index = index %}\n        {%- endif %}\n    {%- endif %}\n{%- endfor %}\n{%- for message in messages %}\n    {%- if loop.index0 >= num_sys %}\n    {%- set content = render_content(message.content, true)|trim %}\n    {%- if message.role == \"system\" or message.role == \"developer\" %}\n        {{- raise_exception('System message must be at the beginning.') }}\n    {%- elif message.role == \"user\" %}\n        {{- '<|im_start|>' + message.role + '\\n' + content + '<|im_end|>' + '\\n' }}\n    {%- elif message.role == \"assistant\" %}\n        {%- set reasoning_content = '' %}\n        {%- if message.reasoning_content is string %}\n            {%- set reasoning_content = message.reasoning_content %}\n        {%- endif %}\n        {%- set reasoning_content = reasoning_content|trim %}\n        {%- if preserve_thinking is undefined or preserve_thinking is true or loop.index0 > ns.last_query_index %}\n            {{- '<|im_start|>' + message.role + '\\n<think>\\n' + reasoning_content + '\\n</think>\\n\\n' + content }}\n        {%- else %}\n            {{- '<|im_start|>' + message.role + '\\n' + content }}\n        {%- endif %}\n        {%- if message.tool_calls and message.tool_calls is iterable and message.tool_calls is not mapping %}\n            {%- for tool_call in message.tool_calls %}\n                {%- if tool_call.function is defined %}\n                    {%- set tool_call = tool_call.function %}\n                {%- endif %}\n                {%- if tool_call.name is not defined or tool_call.name is none %}\n                    {{- raise_exception('Tool call is missing a function name.') }}\n                {%- endif %}\n                {%- if loop.first %}\n                    {%- if content|trim %}\n                        {{- '\\n\\n<tool_call>\\n<function=' + tool_call.name + '>\\n' }}\n                    {%- else %}\n                        {{- '<tool_call>\\n<function=' + tool_call.name + '>\\n' }}\n                    {%- endif %}\n                {%- else %}\n                    {{- '\\n<tool_call>\\n<function=' + tool_call.name + '>\\n' }}\n                {%- endif %}\n                {%- if tool_call.arguments is mapping %}\n                    {%- for args_name, args_value in tool_call.arguments|items %}\n                        {{- '<parameter=' + args_name + '>\\n' }}\n                        {%- set args_value = args_value | string if args_value is string else args_value | tojson | safe %}\n                        {{- args_value }}\n                        {{- '\\n</parameter>\\n' }}\n                    {%- endfor %}\n                {%- elif tool_call.arguments is string %}\n                    {%- if tool_call.arguments|trim %}\n                        {{- raise_exception('Tool call arguments for function \"' + (tool_call.name | string) + '\" were passed as a JSON string. Parse them into an object before calling apply_chat_template.') }}\n                    {%- endif %}\n                {%- elif tool_call.arguments is defined and tool_call.arguments is not none %}\n                    {{- raise_exception('Tool call arguments for function \"' + (tool_call.name | string) + '\" must be an object/mapping or a JSON string.') }}\n                {%- endif %}\n                {{- '</function>\\n</tool_call>' }}\n            {%- endfor %}\n        {%- endif %}\n        {{- '<|im_end|>\\n' }}\n    {%- elif message.role == \"tool\" %}\n        {%- if loop.previtem and loop.previtem.role != \"tool\" %}\n            {{- '<|im_start|>user' }}\n        {%- endif %}\n        {{- '\\n<tool_response>\\n' }}\n        {{- content }}\n        {{- '\\n</tool_response>' }}\n        {%- if not loop.last and loop.nextitem.role != \"tool\" %}\n            {{- '<|im_end|>\\n' }}\n        {%- elif loop.last %}\n            {{- '<|im_end|>\\n' }}\n        {%- endif %}\n    {%- else %}\n        {{- raise_exception('Unexpected message role.') }}\n    {%- endif %}\n    {%- endif %}\n{%- endfor %}\n{%- if add_generation_prompt %}\n    {{- '<|im_start|>assistant\\n' }}\n    {%- if enable_thinking is defined and enable_thinking is false %}\n        {{- '<think>\\n\\n</think>\\n\\n' }}\n    {%- else %}\n        {{- '<think>\\n' }}\n    {%- endif %}\n{%- endif %}\n{#- Unsloth fixes - developer role, merged system messages, tool calling #}",
+    "chat_template_caps": {
+     "supports_object_arguments": true,
+     "supports_parallel_tool_calls": true,
+     "supports_preserve_reasoning": true,
+     "supports_reasoning_effort": true,
+     "supports_string_content": true,
+     "supports_system_role": true,
+     "supports_tool_calls": true,
+     "supports_tools": true,
+     "supports_typed_content": true,
+     "reasoning_effort_levels": [
+      "low",
+      "medium",
+      "xhigh"
+     ]
+    },
+    "bos_token": "<|endoftext|>",
+    "eos_token": "<|im_end|>",
+    "build_info": "b12222-6245ba844",
+    "is_sleeping": false,
+    "cors_proxy_enabled": false
+   }
+  },
+  "notes": []
+ },
+ "model": {
+  "id": "Qwen3.8-Flash-Next-UD-IQ3_XXS-00001-of-00004.gguf",
+  "quantization": "UD-IQ3_XXS",
+  "context_length": 200192,
+  "context_native": null,
+  "detected_by": "/props"
+ },
+ "benchmark": {
+  "type": "prefill_decode_sweep",
+  "transport": "openai/chat-completions",
+  "lengths": [
+   4096,
+   16384,
+   32768,
+   65536,
+   100000
+  ],
+  "runs": 3,
+  "max_tokens": 128,
+  "temperature": 0.0,
+  "thinking": false,
+  "prompt_source": "deterministic word list",
+  "cache": "fresh per run (unique nonce prefix)",
+  "timing_source": "server timings when present, else client",
+  "calibration": {
+   "tokens_per_word": 1.7233333333333334,
+   "overhead_tokens": 29
+  }
+ },
+ "results": [
+  {
+   "target_tokens": 4096,
+   "runs_attempted": 3,
+   "runs_ok": 3,
+   "prompt_tokens": null,
+   "reused_tokens": {
+    "median": 0,
+    "min": 0,
+    "max": 0,
+    "n": 3
+   },
+   "prefill_tps": {
+    "median": 1090.751,
+    "min": 1079.114,
+    "max": 1095.069,
+    "n": 3
+   },
+   "decode_tps": {
+    "median": 50.752,
+    "min": 43.408,
+    "max": 51.271,
+    "n": 3
+   },
+   "ttft_s": {
+    "median": 2.449,
+    "min": 2.35,
+    "max": 2.458,
+    "n": 3
+   },
+   "total_s": {
+    "median": 4.827,
+    "min": 4.808,
+    "max": 4.951,
+    "n": 3
+   },
+   "generated_tokens": {
+    "median": 128,
+    "min": 102,
+    "max": 128,
+    "n": 3
+   }
+  },
+  {
+   "target_tokens": 16384,
+   "runs_attempted": 3,
+   "runs_ok": 3,
+   "prompt_tokens": null,
+   "reused_tokens": {
+    "median": 0,
+    "min": 0,
+    "max": 0,
+    "n": 3
+   },
+   "prefill_tps": {
+    "median": 1495.806,
+    "min": 1428.975,
+    "max": 1498.471,
+    "n": 3
+   },
+   "decode_tps": {
+    "median": 58.019,
+    "min": 57.273,
+    "max": 65.103,
+    "n": 3
+   },
+   "ttft_s": {
+    "median": 6.907,
+    "min": 6.764,
+    "max": 7.072,
+    "n": 3
+   },
+   "total_s": {
+    "median": 9.124,
+    "min": 8.715,
+    "max": 9.261,
+    "n": 3
+   },
+   "generated_tokens": {
+    "median": 128,
+    "min": 128,
+    "max": 128,
+    "n": 3
+   }
+  },
+  {
+   "target_tokens": 32768,
+   "runs_attempted": 3,
+   "runs_ok": 3,
+   "prompt_tokens": null,
+   "reused_tokens": {
+    "median": 0,
+    "min": 0,
+    "max": 0,
+    "n": 3
+   },
+   "prefill_tps": {
+    "median": 1662.057,
+    "min": 1637.324,
+    "max": 1666.74,
+    "n": 3
+   },
+   "decode_tps": {
+    "median": 59.956,
+    "min": 54.901,
+    "max": 65.584,
+    "n": 3
+   },
+   "ttft_s": {
+    "median": 12.183,
+    "min": 12.148,
+    "max": 12.34,
+    "n": 3
+   },
+   "total_s": {
+    "median": 14.467,
+    "min": 14.084,
+    "max": 14.496,
+    "n": 3
+   },
+   "generated_tokens": {
+    "median": 128,
+    "min": 128,
+    "max": 128,
+    "n": 3
+   }
+  },
+  {
+   "target_tokens": 65536,
+   "runs_attempted": 3,
+   "runs_ok": 3,
+   "prompt_tokens": null,
+   "reused_tokens": {
+    "median": 0,
+    "min": 0,
+    "max": 0,
+    "n": 3
+   },
+   "prefill_tps": {
+    "median": 1707.75,
+    "min": 1676.69,
+    "max": 1723.72,
+    "n": 3
+   },
+   "decode_tps": {
+    "median": 57.056,
+    "min": 56.951,
+    "max": 61.911,
+    "n": 3
+   },
+   "ttft_s": {
+    "median": 23.639,
+    "min": 23.539,
+    "max": 24.047,
+    "n": 3
+   },
+   "total_s": {
+    "median": 25.778,
+    "min": 25.691,
+    "max": 26.273,
+    "n": 3
+   },
+   "generated_tokens": {
+    "median": 128,
+    "min": 128,
+    "max": 128,
+    "n": 3
+   }
+  },
+  {
+   "target_tokens": 100000,
+   "runs_attempted": 3,
+   "runs_ok": 3,
+   "prompt_tokens": null,
+   "reused_tokens": {
+    "median": 0,
+    "min": 0,
+    "max": 0,
+    "n": 3
+   },
+   "prefill_tps": {
+    "median": 1650.495,
+    "min": 1630.718,
+    "max": 1661.088,
+    "n": 3
+   },
+   "decode_tps": {
+    "median": 57.655,
+    "min": 53.595,
+    "max": 58.331,
+    "n": 3
+   },
+   "ttft_s": {
+    "median": 37.766,
+    "min": 37.183,
+    "max": 41.301,
+    "n": 3
+   },
+   "total_s": {
+    "median": 39.955,
+    "min": 39.395,
+    "max": 43.671,
+    "n": 3
+   },
+   "generated_tokens": {
+    "median": 128,
+    "min": 128,
+    "max": 128,
+    "n": 3
+   }
+  }
+ ],
+ "requests": [
+  {
+   "ok": true,
+   "error": null,
+   "ttft_s": 2.458,
+   "total_s": 4.808,
+   "first_token_kind": "content",
+   "prompt_tokens": null,
+   "reused_tokens": 0,
+   "read_tokens": 2539,
+   "generated_tokens": 102,
+   "prefill_tps": 1079.1136052892293,
+   "prefill_tps_source": "engine",
+   "decode_tps": 43.40844839054665,
+   "decode_tps_source": "engine",
+   "prompt_ms": 2352.857,
+   "decode_ms": 2349.773,
+   "drafts_offered": 123,
+   "drafts_accepted": 61,
+   "target": 4096,
+   "run": 0,
+   "attempts": 1
+  },
+  {
+   "ok": true,
+   "error": null,
+   "ttft_s": 2.449,
+   "total_s": 4.951,
+   "first_token_kind": "content",
+   "prompt_tokens": null,
+   "reused_tokens": 0,
+   "read_tokens": 2539,
+   "generated_tokens": 128,
+   "prefill_tps": 1090.7514671874549,
+   "prefill_tps_source": "engine",
+   "decode_tps": 50.752252281053984,
+   "decode_tps_source": "engine",
+   "prompt_ms": 2327.753,
+   "decode_ms": 2502.352,
+   "drafts_offered": 156,
+   "drafts_accepted": 75,
+   "target": 4096,
+   "run": 1,
+   "attempts": 1
+  },
+  {
+   "ok": true,
+   "error": null,
+   "ttft_s": 2.35,
+   "total_s": 4.827,
+   "first_token_kind": "content",
+   "prompt_tokens": null,
+   "reused_tokens": 0,
+   "read_tokens": 2539,
+   "generated_tokens": 128,
+   "prefill_tps": 1095.0691696408355,
+   "prefill_tps_source": "engine",
+   "decode_tps": 51.27103727364038,
+   "decode_tps_source": "engine",
+   "prompt_ms": 2318.575,
+   "decode_ms": 2477.032,
+   "drafts_offered": 150,
+   "drafts_accepted": 76,
+   "target": 4096,
+   "run": 2,
+   "attempts": 1
+  },
+  {
+   "ok": true,
+   "error": null,
+   "ttft_s": 7.072,
+   "total_s": 9.261,
+   "first_token_kind": "content",
+   "prompt_tokens": null,
+   "reused_tokens": 0,
+   "read_tokens": 10041,
+   "generated_tokens": 128,
+   "prefill_tps": 1428.9747870840374,
+   "prefill_tps_source": "engine",
+   "decode_tps": 58.01892330583602,
+   "decode_tps_source": "engine",
+   "prompt_ms": 7026.716,
+   "decode_ms": 2188.941,
+   "drafts_offered": 137,
+   "drafts_accepted": 81,
+   "target": 16384,
+   "run": 0,
+   "attempts": 1
+  },
+  {
+   "ok": true,
+   "error": null,
+   "ttft_s": 6.907,
+   "total_s": 9.124,
+   "first_token_kind": "content",
+   "prompt_tokens": null,
+   "reused_tokens": 0,
+   "read_tokens": 10041,
+   "generated_tokens": 128,
+   "prefill_tps": 1495.805532469378,
+   "prefill_tps_source": "engine",
+   "decode_tps": 57.27260633200523,
+   "decode_tps_source": "engine",
+   "prompt_ms": 6712.771,
+   "decode_ms": 2217.465,
+   "drafts_offered": 149,
+   "drafts_accepted": 77,
+   "target": 16384,
+   "run": 1,
+   "attempts": 1
+  },
+  {
+   "ok": true,
+   "error": null,
+   "ttft_s": 6.764,
+   "total_s": 8.715,
+   "first_token_kind": "content",
+   "prompt_tokens": null,
+   "reused_tokens": 0,
+   "read_tokens": 10041,
+   "generated_tokens": 128,
+   "prefill_tps": 1498.4706376760378,
+   "prefill_tps_source": "engine",
+   "decode_tps": 65.10286508994704,
+   "decode_tps_source": "engine",
+   "prompt_ms": 6700.832,
+   "decode_ms": 1950.759,
+   "drafts_offered": 123,
+   "drafts_accepted": 85,
+   "target": 16384,
+   "run": 2,
+   "attempts": 1
+  },
+  {
+   "ok": true,
+   "error": null,
+   "ttft_s": 12.34,
+   "total_s": 14.467,
+   "first_token_kind": "content",
+   "prompt_tokens": null,
+   "reused_tokens": 0,
+   "read_tokens": 20073,
+   "generated_tokens": 128,
+   "prefill_tps": 1637.3237713342317,
+   "prefill_tps_source": "engine",
+   "decode_tps": 59.9561989280587,
+   "decode_tps_source": "engine",
+   "prompt_ms": 12259.64,
+   "decode_ms": 2118.213,
+   "drafts_offered": 132,
+   "drafts_accepted": 82,
+   "target": 32768,
+   "run": 0,
+   "attempts": 1
+  },
+  {
+   "ok": true,
+   "error": null,
+   "ttft_s": 12.148,
+   "total_s": 14.084,
+   "first_token_kind": "content",
+   "prompt_tokens": null,
+   "reused_tokens": 0,
+   "read_tokens": 20073,
+   "generated_tokens": 128,
+   "prefill_tps": 1666.7395981142338,
+   "prefill_tps_source": "engine",
+   "decode_tps": 65.5841664329908,
+   "decode_tps_source": "engine",
+   "prompt_ms": 12043.273,
+   "decode_ms": 1936.443,
+   "drafts_offered": 122,
+   "drafts_accepted": 86,
+   "target": 32768,
+   "run": 1,
+   "attempts": 1
+  },
+  {
+   "ok": true,
+   "error": null,
+   "ttft_s": 12.183,
+   "total_s": 14.496,
+   "first_token_kind": "content",
+   "prompt_tokens": null,
+   "reused_tokens": 0,
+   "read_tokens": 20073,
+   "generated_tokens": 128,
+   "prefill_tps": 1662.0572929108328,
+   "prefill_tps_source": "engine",
+   "decode_tps": 54.90066222302725,
+   "decode_tps_source": "engine",
+   "prompt_ms": 12077.201,
+   "decode_ms": 2313.269,
+   "drafts_offered": 146,
+   "drafts_accepted": 78,
+   "target": 32768,
+   "run": 2,
+   "attempts": 1
+  },
+  {
+   "ok": true,
+   "error": null,
+   "ttft_s": 24.047,
+   "total_s": 26.273,
+   "first_token_kind": "content",
+   "prompt_tokens": null,
+   "reused_tokens": 0,
+   "read_tokens": 40079,
+   "generated_tokens": 128,
+   "prefill_tps": 1676.6896133724183,
+   "prefill_tps_source": "engine",
+   "decode_tps": 57.056111316023916,
+   "decode_tps_source": "engine",
+   "prompt_ms": 23903.649,
+   "decode_ms": 2225.879,
+   "drafts_offered": 137,
+   "drafts_accepted": 80,
+   "target": 65536,
+   "run": 0,
+   "attempts": 1
+  },
+  {
+   "ok": true,
+   "error": null,
+   "ttft_s": 23.539,
+   "total_s": 25.778,
+   "first_token_kind": "content",
+   "prompt_tokens": null,
+   "reused_tokens": 0,
+   "read_tokens": 40079,
+   "generated_tokens": 128,
+   "prefill_tps": 1723.719640671182,
+   "prefill_tps_source": "engine",
+   "decode_tps": 56.95105572459007,
+   "decode_tps_source": "engine",
+   "prompt_ms": 23251.461,
+   "decode_ms": 2229.985,
+   "drafts_offered": 138,
+   "drafts_accepted": 81,
+   "target": 65536,
+   "run": 1,
+   "attempts": 1
+  },
+  {
+   "ok": true,
+   "error": null,
+   "ttft_s": 23.639,
+   "total_s": 25.691,
+   "first_token_kind": "content",
+   "prompt_tokens": null,
+   "reused_tokens": 0,
+   "read_tokens": 40079,
+   "generated_tokens": 128,
+   "prefill_tps": 1707.7500594297362,
+   "prefill_tps_source": "engine",
+   "decode_tps": 61.911415002452074,
+   "decode_tps_source": "engine",
+   "prompt_ms": 23468.891,
+   "decode_ms": 2051.318,
+   "drafts_offered": 123,
+   "drafts_accepted": 85,
+   "target": 65536,
+   "run": 2,
+   "attempts": 1
+  },
+  {
+   "ok": true,
+   "error": null,
+   "ttft_s": 37.183,
+   "total_s": 39.395,
+   "first_token_kind": "content",
+   "prompt_tokens": null,
+   "reused_tokens": 0,
+   "read_tokens": 61081,
+   "generated_tokens": 128,
+   "prefill_tps": 1661.0875109829726,
+   "prefill_tps_source": "engine",
+   "decode_tps": 57.654863460118044,
+   "decode_tps_source": "engine",
+   "prompt_ms": 36771.693,
+   "decode_ms": 2202.763,
+   "drafts_offered": 135,
+   "drafts_accepted": 82,
+   "target": 100000,
+   "run": 0,
+   "attempts": 1
+  },
+  {
+   "ok": true,
+   "error": null,
+   "ttft_s": 41.301,
+   "total_s": 43.671,
+   "first_token_kind": "content",
+   "prompt_tokens": null,
+   "reused_tokens": 0,
+   "read_tokens": 61081,
+   "generated_tokens": 128,
+   "prefill_tps": 1650.4946687706256,
+   "prefill_tps_source": "engine",
+   "decode_tps": 53.59491025595579,
+   "decode_tps_source": "engine",
+   "prompt_ms": 37007.693,
+   "decode_ms": 2369.628,
+   "drafts_offered": 137,
+   "drafts_accepted": 81,
+   "target": 100000,
+   "run": 1,
+   "attempts": 1
+  },
+  {
+   "ok": true,
+   "error": null,
+   "ttft_s": 37.766,
+   "total_s": 39.955,
+   "first_token_kind": "content",
+   "prompt_tokens": null,
+   "reused_tokens": 0,
+   "read_tokens": 61081,
+   "generated_tokens": 128,
+   "prefill_tps": 1630.717951604031,
+   "prefill_tps_source": "engine",
+   "decode_tps": 58.33121289422943,
+   "decode_tps_source": "engine",
+   "prompt_ms": 37456.508,
+   "decode_ms": 2177.222,
+   "drafts_offered": 129,
+   "drafts_accepted": 83,
+   "target": 100000,
+   "run": 2,
+   "attempts": 1
+  }
+ ],
+ "notes": [],
+ "limitations": [
+  "Speeds are the server's own timings when it reports them (the *_source field says which).",
+  "A warmed expert/weight cache and a fresh prompt are different conditions; reused_tokens shows whether any prefix was reused (0 means none)."
+ ]
+}

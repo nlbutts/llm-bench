@@ -3,6 +3,16 @@
     python -m llmbench.plot results/*.json                 # -> plots/comparison-*.png
     python -m llmbench.plot a.json b.json c.json --out plots --metric decode
     python -m llmbench.plot results/ --formats png,svg
+    python -m llmbench.plot results/ --regex 'R9700.*(strata|radiance)'
+    python -m llmbench.plot --regex '2026-11' --exclude 'iq2'
+
+`--regex` and `--exclude` select files by regular expression. They are matched
+against both the path and the filename, so `--regex 'R9700'` finds a file under
+`results/` while `--regex '^results/2026-11'` narrows by directory and date.
+Repeated include patterns are OR'd, exclusions always win, and the positional
+file/directory arguments still work as before. With no positional arguments the
+default `results/` directory is filtered, so a regex alone is enough to choose
+what to plot.
 
 Each file is one series, labelled with its own `label` field and nothing else
 (the filename when a file has no label), because a composed device / framework
@@ -25,6 +35,7 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import re
 import sys
 from pathlib import Path
 
@@ -46,6 +57,57 @@ def _warn(msg: str) -> None:
 
 def load_results(path: Path) -> dict:
     return json.loads(Path(path).read_text(encoding="utf-8"))
+
+
+def regex_arg(text: str):
+    """Compile an argparse value now, so a bad pattern is a usage error, not a traceback."""
+    try:
+        return re.compile(text)
+    except re.error as e:
+        raise argparse.ArgumentTypeError("invalid regular expression %r: %s" % (text, e))
+
+
+def _pattern_hits(patterns, fp: Path) -> bool:
+    """True when any pattern matches the path or just the filename.
+
+    Matching both makes `--regex R9700` useful without spelling out `results/`,
+    while `--regex '^results/2026-11'` can still select by directory and date.
+    """
+    path = fp.as_posix()
+    name = fp.name
+    return any(p.search(path) or p.search(name) for p in patterns)
+
+
+def filter_files(files: list[Path], include=(), exclude=()) -> list[Path]:
+    """Keep files matching an include pattern and no exclude pattern.
+
+    Includes are OR'd: one matching pattern is enough. Excludes always win, so
+    `--regex . --exclude old` is a usable "everything but old" selection.
+    """
+    return [fp for fp in files
+            if (not include or _pattern_hits(include, fp))
+            and not (exclude and _pattern_hits(exclude, fp))]
+
+
+def collect_files(given: list[str], warn) -> list[Path]:
+    """Expand the positional file/directory arguments into result paths.
+
+    A directory contributes its top-level `*.json` files, exactly as before.
+    Missing paths are reported here rather than left to fail at load time.
+    """
+    files: list[Path] = []
+    for f in given or ["results"]:
+        p = Path(f)
+        if p.is_dir():
+            found = sorted(p.glob("*.json"))
+            if not found:
+                warn("warning: no .json files in %s" % p)
+            files.extend(found)
+        elif not p.exists():
+            warn("warning: %s skipped - no such file" % p)
+        else:
+            files.append(p)
+    return files
 
 
 def _json_kind(value) -> str:
@@ -481,7 +543,15 @@ def _svg_fallback(loaded, outdir: Path, metrics: list[str], title: str | None) -
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(prog="llmbench-plot",
                                  description="Compare llmbench result JSON files as plots.")
-    ap.add_argument("files", nargs="*", help="result JSON files or directories (default: results/)")
+    ap.add_argument("files", nargs="*",
+                    help="result JSON files or directories, filtered by --regex/--exclude "
+                         "(default: results/)")
+    ap.add_argument("--regex", action="append", default=[], type=regex_arg, metavar="RE",
+                    help="only plot files whose path or filename matches this regular "
+                         "expression (repeatable; matches are OR'd)")
+    ap.add_argument("--exclude", action="append", default=[], type=regex_arg, metavar="RE",
+                    help="skip files whose path or filename matches this regular expression "
+                         "(repeatable; takes precedence over --regex)")
     ap.add_argument("--out", default="plots", help="output directory (default plots/)")
     ap.add_argument("--metric", action="append", choices=list(METRICS),
                     help="restrict to one metric (repeatable); default all")
@@ -497,18 +567,20 @@ def main(argv=None) -> int:
     warn = (lambda msg: None) if a.quiet else _warn
     metrics = a.metric or list(METRICS)
 
-    files: list[Path] = []
-    for f in (a.files or ["results"]):
-        p = Path(f)
-        if p.is_dir():
-            found = sorted(p.glob("*.json"))
-            if not found:
-                warn("warning: no .json files in %s" % p)
-            files.extend(found)
-        elif not p.exists():
-            warn("warning: %s skipped - no such file" % p)
-        else:
-            files.append(p)
+    candidates = collect_files(a.files, warn)
+    files = candidates
+    if a.regex or a.exclude:
+        files = filter_files(candidates, a.regex, a.exclude)
+        if candidates and not files:
+            if a.regex and not any(_pattern_hits(a.regex, fp) for fp in candidates):
+                why = "no candidate file matches --regex %s" % " or ".join(
+                    repr(p.pattern) for p in a.regex)
+            else:
+                why = "every file matching --regex was excluded by --exclude"
+                if not a.regex:
+                    why = "every candidate file was excluded by --exclude"
+            warn("warning: %s (%d candidate file%s)"
+                 % (why, len(candidates), "" if len(candidates) == 1 else "s"))
     if not files:
         warn("no result files found")
         return 1
