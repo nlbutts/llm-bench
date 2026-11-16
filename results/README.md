@@ -8,6 +8,9 @@ Compare any set of these files as plots:
 
 ```bash
 python -m llmbench.plot results/*.json --out plots
+
+# or select a subset by regex (matches the path or filename)
+python -m llmbench.plot --regex 'R9700.*(strata|radiance)' --out plots
 ```
 
 ## 2026-10-15 - Strata UD-IQ4_XS on Radeon 8060S (Strix Halo)

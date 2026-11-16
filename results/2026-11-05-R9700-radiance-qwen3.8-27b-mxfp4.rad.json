@@ -5,7 +5,7 @@
   "version": "0.1.0"
  },
  "generated_at": "2026-11-05T07:08:42-06:00",
- "label": "R9700 radiance Q3827B-MXFP4",
+ "label": "R9700 Radiance Qwen3.8-27B-MXFP4 B",
  "device": {
   "accelerator": {
    "kind": "gpu",

@@ -5,7 +5,7 @@
   "version": "0.1.0"
  },
  "generated_at": "2026-11-08T17:50:23-06:00",
- "label": null,
+ "label": "R9700 Strata Qwen3.8 Flash Next Unsloth UD IQ4 XS",
  "device": {
   "accelerator": {
    "kind": "gpu",
