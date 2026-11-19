@@ -1,0 +1,787 @@
+{
+ "schema": 1,
+ "tool": {
+  "name": "llm-bench",
+  "version": "0.1.0"
+ },
+ "generated_at": "2026-11-19T14:46:59-06:00",
+ "label": "RTX5000 72GB Maya DS",
+ "device": {
+  "accelerator": {
+   "kind": "gpu",
+   "vendor": "NVIDIA",
+   "name": "NVIDIA GeForce RTX 4090",
+   "memory_total_gib": 23.99,
+   "driver": "595.99.02",
+   "architecture": "sm_89",
+   "compute_runtime": "CUDA 13.2",
+   "count": 1
+  },
+  "host": {
+   "cpu": {
+    "name": "AMD Ryzen Threadripper PRO 7985WX 64-Cores",
+    "logical_cores": 128,
+    "physical_cores": 64
+   },
+   "ram_total_gib": 124.91,
+   "os": {
+    "system": "Linux",
+    "release": "6.8.0-149-generic",
+    "version": "#149~22.04.1-Ubuntu SMP PREEMPT_DYNAMIC Wed Oct 28 20:58:45 UTC ",
+    "distro": "Ubuntu 22.04.5 LTS",
+    "machine": "x86_64"
+   }
+  }
+ },
+ "framework": {
+  "endpoint": "http://192.168.128.11:8080",
+  "name": "llama.cpp (llama-server)",
+  "version": null,
+  "detected_by": "/props",
+  "dialects": [],
+  "probes": {
+   "v1_status": {
+    "service": "maya",
+    "model": "deepseek-v4.1-flash",
+    "engine": "ds4-0.1",
+    "started": 1795120675,
+    "uptime_s": 279,
+    "cache_max_tokens": 262144,
+    "context": {
+     "native": 262144,
+     "max_positions": 262144
+    },
+    "concurrency": {
+     "serving": 1,
+     "requested": 1
+    },
+    "dialects": [
+     "/v1/chat/completions",
+     "/v1/responses",
+     "/v1/messages"
+    ],
+    "responses": {
+     "cache": {
+      "hits": 0,
+      "misses": 0,
+      "writes": 0,
+      "expired": 0,
+      "evicted": 0,
+      "deleted": 0,
+      "rejected": 0,
+      "assembly_rejected": 0,
+      "write_seconds": 0,
+      "read_seconds": 0,
+      "lock_wait_seconds": 1.3100216165184975e-06,
+      "lock_hold_seconds": 0,
+      "entries": 0,
+      "blocks": 0,
+      "bytes": 0,
+      "inflight_bytes": 0,
+      "peak_inflight_bytes": 0,
+      "max_entries": 128,
+      "max_bytes": 67108864,
+      "ttl_s": 3600
+     },
+     "jobs": {
+      "records": 0,
+      "running": 0,
+      "queued": 0,
+      "readers": 0,
+      "event_bytes": 0
+     },
+     "structured_outputs": {
+      "mode": "validate-before-publish",
+      "schema_draft": "2020-12",
+      "constrained_decoding": false
+     }
+    },
+    "vision": {
+     "enabled": true,
+     "available": true,
+     "error": null
+    },
+    "memory_note": null,
+    "activity": {
+     "requests": 0,
+     "in_flight": 0,
+     "queue": {
+      "waiting": 0,
+      "first_waited_s": 0.0,
+      "places": 1
+     },
+     "last_request_at": null
+    },
+    "last_timings": null,
+    "machine": {
+     "at": 1795120955,
+     "gpu": {
+      "name": "NVIDIA RTX PRO 5000 72GB Blackwell",
+      "used_mib": 73098.0,
+      "total_mib": 73415.0,
+      "util_pct": 0,
+      "temp_c": 43,
+      "power_w": 18.865
+     },
+     "ram": {
+      "used_gib": 133.1,
+      "total_gib": 247.3
+     }
+    }
+   },
+   "health": {
+    "status": "ok",
+    "max_context": 262144,
+    "model": "deepseek-v4.1-flash",
+    "max_text_file": 1048576,
+    "model_label": "DeepSeek V4.1 \u00b7 Maya-S",
+    "images": true,
+    "api_key": false,
+    "defaults": {
+     "temperature": 1.0,
+     "top_p": 1.0,
+     "reasoning_effort": "high"
+    },
+    "videos": false,
+    "version": "1.1.67",
+    "mcp_tools": false,
+    "unloaded": false,
+    "history_thinking": false,
+    "ablate": {
+     "available": true,
+     "default": false,
+     "why": ""
+    }
+   },
+   "props": {
+    "default_generation_settings": {
+     "n_ctx": 262144,
+     "params": {
+      "temperature": 1.0,
+      "top_p": 1.0,
+      "n_predict": -1
+     }
+    },
+    "total_slots": 1,
+    "model_alias": "deepseek-v4.1-flash",
+    "chat_template": "{#- Legacy standalone DeepSeek-V4.1 Jinja export. Maya's server renders DeepSeek with serve/ds41_encoding.py,\n    pinned to revision 1bae0e1088993b9b82de08f59de5be5a34e42170 of deepseek-ai/DeepSeek-V4.1-Flash-1017.\n    This export covers ordinary chat/tools only; see docs/deepseek-prompt-format.md for its conformance limits.\n    DeepSeek-V4.1's prompt format (the model repo's encoding/encoding.py), approximated in Jinja.\n    Turns: <\uff5cUser\uff5c> ... <\uff5cAssistant\uff5c> (reasoning</think>)answer<\uff5cend\u2581of\u2581sentence\uff5c>.  Thinking mode ends the prompt\n    with <think> and starts with a reasoning-effort line (low 50, high 75, max 100); chat mode ends it with </think>.\n    Tool results (role \"tool\") are <tool_result> blocks of a user turn, merged with the user messages around them;\n    tool calls are DSML blocks; the tools are listed in the system turn.  Earlier turns keep their reasoning only when\n    tools are given (encoding.py's drop_thinking).  A picture in a message's content list is its placeholder\n    <\uff5cdeepseek_image\uff5c>, a block of its own between the text blocks (the server expands it into the picture's span). -#}\n{%- set thinking = enable_thinking is not defined or enable_thinking -%}\n{%- set efforts = {'low': 50, 'medium': 75, 'high': 75, 'xhigh': 100, 'max': 100} -%}\n{%- if reasoning_effort is defined and reasoning_effort is number -%}\n{%- set budget = reasoning_effort -%}\n{%- elif reasoning_effort is defined and reasoning_effort in efforts -%}\n{%- set budget = efforts[reasoning_effort] -%}\n{%- else -%}\n{%- set budget = 75 -%}\n{%- endif -%}\n{%- set has_tools = tools is defined and tools is not none and tools | length > 0 -%}\n{%- set keep = has_tools -%}\n{%- set ns = namespace(last_user=-1, schemas='') -%}\n{%- if has_tools -%}{%- for t in tools -%}{%- set ns.schemas = ns.schemas ~ (t | tojson) ~ ('' if loop.last else '\\n') -%}{%- endfor -%}{%- endif -%}\n{%- for m in messages -%}{%- if m.role == 'user' -%}{%- set ns.last_user = loop.index0 -%}{%- endif -%}{%- endfor -%}\n{%- macro text(c) -%}\n{%- if c is string -%}{{ c }}{%- elif c is iterable -%}\n{%- for p in c if p.type in ['text', 'image'] -%}{%- if not loop.first -%}{{ '\\n\\n' }}{%- endif -%}{{ p.text if p.type == 'text' else '<\uff5cdeepseek_image\uff5c>' }}{%- endfor -%}\n{%- endif -%}\n{%- endmacro -%}\n{%- macro tools_block() -%}\n## Tools\n\nYou have access to a set of tools to help answer the user's question. You can invoke tools by writing a \"<\uff5cDSML\uff5c calls>\" block like the following:\n\n<\uff5cDSML\uff5c calls>\n<\uff5cDSML\uff5c invoke name=\"$TOOL_NAME\">\n<\uff5cDSML\uff5c parameter name=\"$PARAMETER_NAME\" string=\"true|false\">$PARAMETER_VALUE</\uff5cDSML\uff5c parameter>\n...\n</\uff5cDSML\uff5c invoke>\n<\uff5cDSML\uff5c invoke name=\"$TOOL_NAME2\">\n...\n</\uff5cDSML\uff5c invoke>\n</\uff5cDSML\uff5c calls>\n\nString parameters should be specified as is and set `string=\"true\"`. For all other types (numbers, booleans, arrays, objects), pass the value in JSON format and set `string=\"false\"`.\n\nIf thinking_mode is enabled (triggered by <think>), you MUST output your complete reasoning inside <think>...</think> BEFORE any tool calls or final response.\n\nOtherwise, output directly after </think> with tool calls or final response.\n\n### Available Tool Schemas\n\n{{ ns.schemas }}\n\nYou MUST strictly follow the above defined tool name and parameter schemas to invoke tool calls.\n{% endmacro -%}\n{{- '<\uff5cbegin\u2581of\u2581sentence\uff5c>' -}}\n{%- set effort_line = ('Reasoning Effort: ' ~ budget ~ ' (range 1-100, the higher the value, the more thorough the reasoning)\\n\\n') if thinking else '' -%}\n{%- if messages and messages[0].role == 'system' -%}\n{{- '<\uff5cSystem\uff5c>' ~ effort_line ~ text(messages[0].content) -}}\n{%- if has_tools -%}{{- '\\n\\n' ~ tools_block() -}}{%- endif -%}\n{%- elif has_tools -%}\n{{- '<\uff5cSystem\uff5c>' ~ effort_line ~ '\\n\\n' ~ tools_block() -}}\n{%- elif thinking -%}\n{{- '<\uff5cSystem\uff5c>' ~ effort_line -}}\n{%- endif -%}\n{%- for m in messages -%}\n{%- set i = loop.index0 -%}\n{%- set prev = messages[i - 1].role if i > 0 else '' -%}\n{%- set next = messages[i + 1].role if i + 1 < messages | length else '' -%}\n{%- if m.role == 'system' and i == 0 -%}\n{%- elif m.role in ['user', 'tool', 'system'] -%}\n{%- if prev in ['user', 'tool'] or (prev == 'system' and i - 1 > 0) -%}{{- '\\n\\n' -}}{%- else -%}{{- '<\uff5cUser\uff5c>' -}}{%- endif -%}\n{%- if m.role == 'tool' -%}{{- '<tool_result>' ~ text(m.content) ~ '</tool_result>' -}}{%- else -%}{{- text(m.content) -}}{%- endif -%}\n{%- if next not in ['user', 'tool', 'system'] -%}\n{%- if thinking and (keep or i >= ns.last_user) -%}{{- '<\uff5cAssistant\uff5c><think>' -}}{%- else -%}{{- '<\uff5cAssistant\uff5c></think>' -}}{%- endif -%}\n{%- endif -%}\n{%- elif m.role == 'assistant' -%}\n{%- if thinking and (keep or i > ns.last_user) -%}{{- (m.reasoning_content or '') ~ '</think>' -}}{%- endif -%}\n{{- text(m.content) -}}\n{%- if m.tool_calls -%}\n{{- '\\n\\n<\uff5cDSML\uff5c calls>\\n' -}}\n{%- for c in m.tool_calls -%}\n{%- set f = c.function if c.function is defined else c -%}\n{{- '<\uff5cDSML\uff5c invoke name=\"' ~ f.name ~ '\">\\n' -}}\n{%- for k, v in (f.arguments or {}).items() -%}\n{{- '<\uff5cDSML\uff5c parameter name=\"' ~ k ~ '\" string=\"' ~ ('true' if v is string else 'false') ~ '\">' ~ (v if v is string else v | tojson) ~ '</\uff5cDSML\uff5c parameter>' -}}\n{%- if not loop.last -%}{{- '\\n' -}}{%- endif -%}\n{%- endfor -%}\n{{- '\\n</\uff5cDSML\uff5c invoke>' -}}{%- if not loop.last -%}{{- '\\n' -}}{%- endif -%}\n{%- endfor -%}\n{{- '\\n</\uff5cDSML\uff5c calls>' -}}\n{%- endif -%}\n{{- '<\uff5cend\u2581of\u2581sentence\uff5c>' -}}\n{%- endif -%}\n{%- endfor -%}\n",
+    "modalities": {
+     "vision": true
+    },
+    "models_autoload": false,
+    "is_sleeping": false,
+    "model_path": "/home/nlbutts/projects/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/Maya-S/maya-ds4",
+    "build_info": "Strata ds4-0.1",
+    "ablate": {
+     "available": true,
+     "default": false,
+     "why": ""
+    }
+   }
+  },
+  "notes": []
+ },
+ "model": {
+  "id": "maya-ds4",
+  "quantization": null,
+  "context_length": 262144,
+  "context_native": null,
+  "detected_by": "/props"
+ },
+ "benchmark": {
+  "type": "prefill_decode_sweep",
+  "transport": "openai/chat-completions",
+  "lengths": [
+   4096,
+   16384,
+   32768,
+   65536,
+   100000
+  ],
+  "runs": 3,
+  "max_tokens": 128,
+  "temperature": 0.0,
+  "thinking": false,
+  "prompt_source": "deterministic word list",
+  "cache": "fresh per run (unique nonce prefix)",
+  "timing_source": "server timings when present, else client",
+  "calibration": {
+   "tokens_per_word": 1.0383333333333333,
+   "overhead_tokens": 39
+  }
+ },
+ "results": [
+  {
+   "target_tokens": 4096,
+   "runs_attempted": 3,
+   "runs_ok": 3,
+   "prompt_tokens": {
+    "median": 4125,
+    "min": 4125,
+    "max": 4125,
+    "n": 3
+   },
+   "reused_tokens": {
+    "median": 0,
+    "min": 0,
+    "max": 0,
+    "n": 3
+   },
+   "prefill_tps": {
+    "median": 1250.9,
+    "min": 1154.1,
+    "max": 1276.4,
+    "n": 3
+   },
+   "decode_tps": {
+    "median": 44.0,
+    "min": 38.7,
+    "max": 47.9,
+    "n": 3
+   },
+   "ttft_s": {
+    "median": 3.311,
+    "min": 3.245,
+    "max": 3.587,
+    "n": 3
+   },
+   "total_s": {
+    "median": 6.221,
+    "min": 5.914,
+    "max": 6.892,
+    "n": 3
+   },
+   "generated_tokens": {
+    "median": 128,
+    "min": 128,
+    "max": 128,
+    "n": 3
+   }
+  },
+  {
+   "target_tokens": 16384,
+   "runs_attempted": 3,
+   "runs_ok": 3,
+   "prompt_tokens": {
+    "median": 16561,
+    "min": 16561,
+    "max": 16561,
+    "n": 3
+   },
+   "reused_tokens": {
+    "median": 0,
+    "min": 0,
+    "max": 0,
+    "n": 3
+   },
+   "prefill_tps": {
+    "median": 3057.5,
+    "min": 2671.0,
+    "max": 3060.9,
+    "n": 3
+   },
+   "decode_tps": {
+    "median": 48.2,
+    "min": 44.9,
+    "max": 50.0,
+    "n": 3
+   },
+   "ttft_s": {
+    "median": 5.445,
+    "min": 5.441,
+    "max": 6.231,
+    "n": 3
+   },
+   "total_s": {
+    "median": 8.29,
+    "min": 8.101,
+    "max": 8.788,
+    "n": 3
+   },
+   "generated_tokens": {
+    "median": 128,
+    "min": 128,
+    "max": 128,
+    "n": 3
+   }
+  },
+  {
+   "target_tokens": 32768,
+   "runs_attempted": 3,
+   "runs_ok": 3,
+   "prompt_tokens": {
+    "median": 33125,
+    "min": 33125,
+    "max": 33125,
+    "n": 3
+   },
+   "reused_tokens": {
+    "median": 0,
+    "min": 0,
+    "max": 0,
+    "n": 3
+   },
+   "prefill_tps": {
+    "median": 3416.7,
+    "min": 3403.6,
+    "max": 3460.2,
+    "n": 3
+   },
+   "decode_tps": {
+    "median": 44.8,
+    "min": 44.5,
+    "max": 50.2,
+    "n": 3
+   },
+   "ttft_s": {
+    "median": 9.749,
+    "min": 9.63,
+    "max": 9.787,
+    "n": 3
+   },
+   "total_s": {
+    "median": 12.27,
+    "min": 12.177,
+    "max": 12.662,
+    "n": 3
+   },
+   "generated_tokens": {
+    "median": 128,
+    "min": 113,
+    "max": 128,
+    "n": 3
+   }
+  },
+  {
+   "target_tokens": 65536,
+   "runs_attempted": 3,
+   "runs_ok": 3,
+   "prompt_tokens": {
+    "median": 66238,
+    "min": 66238,
+    "max": 66238,
+    "n": 3
+   },
+   "reused_tokens": {
+    "median": 0,
+    "min": 0,
+    "max": 0,
+    "n": 3
+   },
+   "prefill_tps": {
+    "median": 3586.7,
+    "min": 3584.4,
+    "max": 3627.0,
+    "n": 3
+   },
+   "decode_tps": {
+    "median": 46.7,
+    "min": 46.1,
+    "max": 48.3,
+    "n": 3
+   },
+   "ttft_s": {
+    "median": 18.571,
+    "min": 18.367,
+    "max": 18.581,
+    "n": 3
+   },
+   "total_s": {
+    "median": 21.153,
+    "min": 21.101,
+    "max": 21.353,
+    "n": 3
+   },
+   "generated_tokens": {
+    "median": 128,
+    "min": 125,
+    "max": 128,
+    "n": 3
+   }
+  },
+  {
+   "target_tokens": 100000,
+   "runs_attempted": 3,
+   "runs_ok": 3,
+   "prompt_tokens": {
+    "median": 101032,
+    "min": 101032,
+    "max": 101032,
+    "n": 3
+   },
+   "reused_tokens": {
+    "median": 0,
+    "min": 0,
+    "max": 0,
+    "n": 3
+   },
+   "prefill_tps": {
+    "median": 3564.7,
+    "min": 3545.1,
+    "max": 3636.7,
+    "n": 3
+   },
+   "decode_tps": {
+    "median": 46.0,
+    "min": 43.6,
+    "max": 47.9,
+    "n": 3
+   },
+   "ttft_s": {
+    "median": 28.655,
+    "min": 28.498,
+    "max": 47.26,
+    "n": 3
+   },
+   "total_s": {
+    "median": 31.13,
+    "min": 31.059,
+    "max": 50.194,
+    "n": 3
+   },
+   "generated_tokens": {
+    "median": 123,
+    "min": 113,
+    "max": 128,
+    "n": 3
+   }
+  }
+ ],
+ "requests": [
+  {
+   "ok": true,
+   "error": null,
+   "ttft_s": 3.587,
+   "total_s": 6.892,
+   "first_token_kind": "content",
+   "prompt_tokens": 4125,
+   "reused_tokens": 0,
+   "read_tokens": 4125,
+   "generated_tokens": 128,
+   "prefill_tps": 1154.1,
+   "prefill_tps_source": "engine",
+   "decode_tps": 38.7,
+   "decode_tps_source": "engine",
+   "prompt_ms": 3574.1,
+   "decode_ms": 3307.0,
+   "drafts_offered": 60,
+   "drafts_accepted": 45,
+   "target": 4096,
+   "run": 0,
+   "attempts": 1
+  },
+  {
+   "ok": true,
+   "error": null,
+   "ttft_s": 3.311,
+   "total_s": 6.221,
+   "first_token_kind": "content",
+   "prompt_tokens": 4125,
+   "reused_tokens": 0,
+   "read_tokens": 4125,
+   "generated_tokens": 128,
+   "prefill_tps": 1250.9,
+   "prefill_tps_source": "engine",
+   "decode_tps": 44.0,
+   "decode_tps_source": "engine",
+   "prompt_ms": 3297.6,
+   "decode_ms": 2912.2,
+   "drafts_offered": 64,
+   "drafts_accepted": 43,
+   "target": 4096,
+   "run": 1,
+   "attempts": 1
+  },
+  {
+   "ok": true,
+   "error": null,
+   "ttft_s": 3.245,
+   "total_s": 5.914,
+   "first_token_kind": "content",
+   "prompt_tokens": 4125,
+   "reused_tokens": 0,
+   "read_tokens": 4125,
+   "generated_tokens": 128,
+   "prefill_tps": 1276.4,
+   "prefill_tps_source": "engine",
+   "decode_tps": 47.9,
+   "decode_tps_source": "engine",
+   "prompt_ms": 3231.8,
+   "decode_ms": 2671.5,
+   "drafts_offered": 70,
+   "drafts_accepted": 50,
+   "target": 4096,
+   "run": 2,
+   "attempts": 1
+  },
+  {
+   "ok": true,
+   "error": null,
+   "ttft_s": 6.231,
+   "total_s": 8.788,
+   "first_token_kind": "content",
+   "prompt_tokens": 16561,
+   "reused_tokens": 0,
+   "read_tokens": 16561,
+   "generated_tokens": 128,
+   "prefill_tps": 2671.0,
+   "prefill_tps_source": "engine",
+   "decode_tps": 50.0,
+   "decode_tps_source": "engine",
+   "prompt_ms": 6200.4,
+   "decode_ms": 2559.7,
+   "drafts_offered": 61,
+   "drafts_accepted": 52,
+   "target": 16384,
+   "run": 0,
+   "attempts": 1
+  },
+  {
+   "ok": true,
+   "error": null,
+   "ttft_s": 5.441,
+   "total_s": 8.29,
+   "first_token_kind": "content",
+   "prompt_tokens": 16561,
+   "reused_tokens": 0,
+   "read_tokens": 16561,
+   "generated_tokens": 128,
+   "prefill_tps": 3060.9,
+   "prefill_tps_source": "engine",
+   "decode_tps": 44.9,
+   "decode_tps_source": "engine",
+   "prompt_ms": 5410.5,
+   "decode_ms": 2851.0,
+   "drafts_offered": 49,
+   "drafts_accepted": 39,
+   "target": 16384,
+   "run": 1,
+   "attempts": 1
+  },
+  {
+   "ok": true,
+   "error": null,
+   "ttft_s": 5.445,
+   "total_s": 8.101,
+   "first_token_kind": "content",
+   "prompt_tokens": 16561,
+   "reused_tokens": 0,
+   "read_tokens": 16561,
+   "generated_tokens": 128,
+   "prefill_tps": 3057.5,
+   "prefill_tps_source": "engine",
+   "decode_tps": 48.2,
+   "decode_tps_source": "engine",
+   "prompt_ms": 5416.6,
+   "decode_ms": 2657.2,
+   "drafts_offered": 68,
+   "drafts_accepted": 50,
+   "target": 16384,
+   "run": 2,
+   "attempts": 1
+  },
+  {
+   "ok": true,
+   "error": null,
+   "ttft_s": 9.63,
+   "total_s": 12.177,
+   "first_token_kind": "content",
+   "prompt_tokens": 33125,
+   "reused_tokens": 0,
+   "read_tokens": 33125,
+   "generated_tokens": 128,
+   "prefill_tps": 3460.2,
+   "prefill_tps_source": "engine",
+   "decode_tps": 50.2,
+   "decode_tps_source": "engine",
+   "prompt_ms": 9573.1,
+   "decode_ms": 2549.1,
+   "drafts_offered": 69,
+   "drafts_accepted": 54,
+   "target": 32768,
+   "run": 0,
+   "attempts": 1
+  },
+  {
+   "ok": true,
+   "error": null,
+   "ttft_s": 9.749,
+   "total_s": 12.27,
+   "first_token_kind": "content",
+   "prompt_tokens": 33125,
+   "reused_tokens": 0,
+   "read_tokens": 33125,
+   "generated_tokens": 113,
+   "prefill_tps": 3416.7,
+   "prefill_tps_source": "engine",
+   "decode_tps": 44.8,
+   "decode_tps_source": "engine",
+   "prompt_ms": 9695.1,
+   "decode_ms": 2523.1,
+   "drafts_offered": 47,
+   "drafts_accepted": 37,
+   "target": 32768,
+   "run": 1,
+   "attempts": 1
+  },
+  {
+   "ok": true,
+   "error": null,
+   "ttft_s": 9.787,
+   "total_s": 12.662,
+   "first_token_kind": "content",
+   "prompt_tokens": 33125,
+   "reused_tokens": 0,
+   "read_tokens": 33125,
+   "generated_tokens": 128,
+   "prefill_tps": 3403.6,
+   "prefill_tps_source": "engine",
+   "decode_tps": 44.5,
+   "decode_tps_source": "engine",
+   "prompt_ms": 9732.2,
+   "decode_ms": 2877.9,
+   "drafts_offered": 63,
+   "drafts_accepted": 41,
+   "target": 32768,
+   "run": 2,
+   "attempts": 1
+  },
+  {
+   "ok": true,
+   "error": null,
+   "ttft_s": 18.367,
+   "total_s": 21.101,
+   "first_token_kind": "content",
+   "prompt_tokens": 66238,
+   "reused_tokens": 0,
+   "read_tokens": 66238,
+   "generated_tokens": 128,
+   "prefill_tps": 3627.0,
+   "prefill_tps_source": "engine",
+   "decode_tps": 46.7,
+   "decode_tps_source": "engine",
+   "prompt_ms": 18262.7,
+   "decode_ms": 2738.2,
+   "drafts_offered": 63,
+   "drafts_accepted": 47,
+   "target": 65536,
+   "run": 0,
+   "attempts": 1
+  },
+  {
+   "ok": true,
+   "error": null,
+   "ttft_s": 18.571,
+   "total_s": 21.153,
+   "first_token_kind": "content",
+   "prompt_tokens": 66238,
+   "reused_tokens": 0,
+   "read_tokens": 66238,
+   "generated_tokens": 125,
+   "prefill_tps": 3586.7,
+   "prefill_tps_source": "engine",
+   "decode_tps": 48.3,
+   "decode_tps_source": "engine",
+   "prompt_ms": 18467.7,
+   "decode_ms": 2586.1,
+   "drafts_offered": 65,
+   "drafts_accepted": 49,
+   "target": 65536,
+   "run": 1,
+   "attempts": 1
+  },
+  {
+   "ok": true,
+   "error": null,
+   "ttft_s": 18.581,
+   "total_s": 21.353,
+   "first_token_kind": "content",
+   "prompt_tokens": 66238,
+   "reused_tokens": 0,
+   "read_tokens": 66238,
+   "generated_tokens": 128,
+   "prefill_tps": 3584.4,
+   "prefill_tps_source": "engine",
+   "decode_tps": 46.1,
+   "decode_tps_source": "engine",
+   "prompt_ms": 18479.5,
+   "decode_ms": 2775.6,
+   "drafts_offered": 71,
+   "drafts_accepted": 47,
+   "target": 65536,
+   "run": 2,
+   "attempts": 1
+  },
+  {
+   "ok": true,
+   "error": null,
+   "ttft_s": 28.498,
+   "total_s": 31.059,
+   "first_token_kind": "content",
+   "prompt_tokens": 101032,
+   "reused_tokens": 0,
+   "read_tokens": 101032,
+   "generated_tokens": 123,
+   "prefill_tps": 3564.7,
+   "prefill_tps_source": "engine",
+   "decode_tps": 47.9,
+   "decode_tps_source": "engine",
+   "prompt_ms": 28342.2,
+   "decode_ms": 2566.3,
+   "drafts_offered": 54,
+   "drafts_accepted": 48,
+   "target": 100000,
+   "run": 0,
+   "attempts": 1
+  },
+  {
+   "ok": true,
+   "error": null,
+   "ttft_s": 28.655,
+   "total_s": 31.13,
+   "first_token_kind": "content",
+   "prompt_tokens": 101032,
+   "reused_tokens": 0,
+   "read_tokens": 101032,
+   "generated_tokens": 113,
+   "prefill_tps": 3545.1,
+   "prefill_tps_source": "engine",
+   "decode_tps": 46.0,
+   "decode_tps_source": "engine",
+   "prompt_ms": 28499.1,
+   "decode_ms": 2458.8,
+   "drafts_offered": 54,
+   "drafts_accepted": 41,
+   "target": 100000,
+   "run": 1,
+   "attempts": 1
+  },
+  {
+   "ok": true,
+   "error": null,
+   "ttft_s": 47.26,
+   "total_s": 50.194,
+   "first_token_kind": "content",
+   "prompt_tokens": 101032,
+   "reused_tokens": 0,
+   "read_tokens": 101032,
+   "generated_tokens": 128,
+   "prefill_tps": 3636.7,
+   "prefill_tps_source": "engine",
+   "decode_tps": 43.6,
+   "decode_tps_source": "engine",
+   "prompt_ms": 27780.9,
+   "decode_ms": 2936.6,
+   "drafts_offered": 56,
+   "drafts_accepted": 43,
+   "target": 100000,
+   "run": 2,
+   "attempts": 1
+  }
+ ],
+ "notes": [],
+ "limitations": [
+  "Speeds are the server's own timings when it reports them (the *_source field says which).",
+  "A warmed expert/weight cache and a fresh prompt are different conditions; reused_tokens shows whether any prefix was reused (0 means none)."
+ ]
+}
